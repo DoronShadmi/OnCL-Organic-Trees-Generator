@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Trees Generator - Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .input-group label {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .input-group input {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 100px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        
+        .input-group button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+        
+        .input-group button:active {
+            transform: translateY(0);
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 30px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            color: #555;
+        }
+        
+        .stats {
+            padding: 20px 30px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            margin: 0 30px 20px 30px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .stats.show {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1976D2;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            padding: 30px;
+            min-height: 200px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        table th {
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+        
+        table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        table td:last-child {
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .total-row {
+            background: #f0f0f0 !important;
+            font-weight: bold;
+        }
+        
+        .total-row td {
+            background: #f0f0f0;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px 20px;
+            margin: 20px 30px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .legend {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Organic Trees Generator</h1>
+            <p>Interactive Real-Time Builder for Organic Trees under Euler non-trivial Partitions</p>
+        </div>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="nInput">Generate for n =</label>
+                <input type="number" id="nInput" min="1" max="20" value="3" />
+                <button onclick="generateTable()">Generate Table</button>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>Instructions:</strong> Enter a natural number (1-20) and click "Generate Table" to see all organic trees 
+            organized under Euler non-trivial Partitions. Each organic tree is color-coded by nesting depth. Note: values above 12 may take a few seconds.
+			
+			
+        </div>
+        
+        <div class="stats" id="stats">
+            <h3>📊 Statistics for n = <span id="statsN"></span></h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Trees</div>
+                    <div class="stat-value" id="totalTrees">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Partitions</div>
+                    <div class="stat-value" id="totalPartitions">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Generation Time</div>
+                    <div class="stat-value" id="genTime">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Generating organic trees...
+        </div>
+        
+        <div class="results" id="results"></div>
+        
+        <div class="legend">
+            <h3>Color Legend - Nesting Depths:</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="color-box" style="background: #FF0000;"></div>
+                    <span>Level 1 - Red</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #0000FF;"></div>
+                    <span>Level 2 - Blue</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #00FF00;"></div>
+                    <span>Level 3 - Green</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #FF00FF;"></div>
+                    <span>Level 4 - Magenta</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #FFA500;"></div>
+                    <span>Level 5 - Orange</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #800080;"></div>
+                    <span>Level 6 - Purple</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #008080;"></div>
+                    <span>Level 7 - Teal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #000000;"></div>
+                    <span>Atomic (1) - Black</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Organic Trees</strong> - Mathematical framework by Doron Shadmi</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Based on Euler partitions with left-to-right saturation principle between symmerty and asymmetry</p>
+        </footer>
+    </div>
+
+    <script>
+        // Color system for nesting depths
+        const COLORS = [
+            '#FF0000',  // Red - depth 1
+            '#0000FF',  // Blue - depth 2  
+            '#00FF00',  // Green - depth 3
+            '#FF00FF',  // Magenta - depth 4
+            '#FFA500',  // Orange - depth 5
+            '#800080',  // Purple - depth 6
+            '#008080',  // Teal - depth 7
+        ];
+
+        // Cache for computed trees
+        const cache = {};
+
+        // Get Euler partitions for n (sorted)
+        function getPartitions(n) {
+            if (n === 1) return [];
+            
+            function partitionHelper(target, maxVal) {
+                if (target === 0) return [[]];
+                const result = [];
+                for (let i = Math.min(target, maxVal); i > 0; i--) {
+                    const subPartitions = partitionHelper(target - i, i);
+                    for (const p of subPartitions) {
+                        result.push([i, ...p]);
+                    }
+                }
+                return result;
+            }
+            
+            let allPartitions = partitionHelper(n, n);
+            allPartitions = allPartitions.filter(p => p.length > 1);
+            
+            // Sort by: num parts (desc), max value (asc), lexicographic
+            allPartitions.sort((a, b) => {
+                // First by number of parts (descending - more parts first)
+                if (a.length !== b.length) return b.length - a.length;
+                
+                // Then by max value (ascending - smaller max first)
+                const maxA = Math.max(...a);
+                const maxB = Math.max(...b);
+                if (maxA !== maxB) return maxA - maxB;
+                
+                // Finally lexicographic
+                for (let i = 0; i < a.length; i++) {
+                    if (a[i] !== b[i]) return a[i] - b[i];
+                }
+                return 0;
+            });
+            
+            return allPartitions;
+        }
+
+        // Build Or(n) recursively
+        function buildOrRecursive(n) {
+            if (cache[n]) return cache[n];
+            
+            if (n === 1) {
+                cache[1] = [1];
+                return [1];
+            }
+            
+            if (n === 2) {
+                cache[2] = [[1, 1], [[1], 1]];
+                return cache[2];
+            }
+            
+            const result = [];
+            const partitions = getPartitions(n);
+            
+            for (const partition of partitions) {
+                const trees = generateTreesForPartition(partition);
+                result.push(...trees);
+            }
+            
+            cache[n] = result;
+            return result;
+        }
+
+        // Generate trees for a specific partition
+        function generateTreesForPartition(partition) {
+            if (JSON.stringify(partition) === JSON.stringify([1, 1])) {
+                return [[1, 1], [[1], 1]];
+            }
+            
+            const variableIndices = [];
+            for (let i = 0; i < partition.length; i++) {
+                if (partition[i] > 1) variableIndices.push(i);
+            }
+            
+            if (variableIndices.length === 0) {
+                return [Array(partition.length).fill(1)];
+            }
+            
+            // Group parts by value
+            const groupsByValue = {};
+            for (const idx of variableIndices) {
+                const val = partition[idx];
+                if (!groupsByValue[val]) groupsByValue[val] = [];
+                groupsByValue[val].push(idx);
+            }
+            
+            const allTrees = [];
+            
+            function enumerateChoices(varPos, currentChoices) {
+                if (varPos >= variableIndices.length) {
+                    // Build tree
+                    const tree = [];
+                    let choiceIdx = 0;
+                    for (let i = 0; i < partition.length; i++) {
+                        if (partition[i] === 1) {
+                            tree.push(1);
+                        } else {
+                            const orList = buildOrRecursive(partition[i]);
+                            tree.push(JSON.parse(JSON.stringify(orList[currentChoices[choiceIdx]])));
+                            choiceIdx++;
+                        }
+                    }
+                    allTrees.push(tree);
+                    return;
+                }
+                
+                const realIdx = variableIndices[varPos];
+                const partValue = partition[realIdx];
+                const orList = buildOrRecursive(partValue);
+                const numOptions = orList.length;
+                
+                // Check position in group
+                const sameValueGroup = groupsByValue[partValue];
+                const posInGroup = sameValueGroup.indexOf(realIdx);
+                
+                let maxAllowed;
+                if (posInGroup === 0) {
+                    maxAllowed = numOptions - 1;
+                } else {
+                    const prevPosInGroup = sameValueGroup[posInGroup - 1];
+                    const prevVarIdx = variableIndices.indexOf(prevPosInGroup);
+                    if (prevVarIdx < currentChoices.length) {
+                        const prevChoice = currentChoices[prevVarIdx];
+                        maxAllowed = Math.min(numOptions - 1, prevChoice);
+                    } else {
+                        maxAllowed = 0;
+                    }
+                }
+                
+                for (let choice = 0; choice <= maxAllowed; choice++) {
+                    currentChoices.push(choice);
+                    enumerateChoices(varPos + 1, currentChoices);
+                    currentChoices.pop();
+                }
+            }
+            
+            enumerateChoices(0, []);
+            return allTrees;
+        }
+
+        // Convert tree to colored HTML
+        function treeToColoredHtml(tree, depth = 1) {
+            if (tree === 1) {
+                return '<span style="color: black;">1</span>';
+            }
+            
+            if (Array.isArray(tree)) {
+                const color = COLORS[(depth - 1) % COLORS.length];
+                const parts = tree.map(subtree => treeToColoredHtml(subtree, depth + 1));
+                const content = parts.join(',');
+                
+                // Only make the outermost brackets bold
+                if (depth === 1) {
+                    return `<span style="color: ${color};"><b>[</b></span>${content}<span style="color: ${color};"><b>]</b></span>`;
+                } else {
+                    return `<span style="color: ${color};">[${content}]</span>`;
+                }
+            }
+            
+            return String(tree);
+        }
+
+        // Format partition
+        function formatPartition(partition) {
+            return '⟨' + partition.join(';') + '⟩';
+        }
+
+        // Generate and display table
+        function generateTable() {
+            const n = parseInt(document.getElementById('nInput').value);
+            
+            // Validation
+            if (isNaN(n) || n < 1 || n > 20) {
+                showError('Please enter a number between 1 and 20');
+                return;
+            }
+            
+            hideError();
+            showLoading();
+            hideStats();
+            clearResults();
+            
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                const startTime = performance.now();
+                
+                try {
+                    // Build all trees up to n
+                    for (let i = 1; i <= n; i++) {
+                        if (!cache[i]) buildOrRecursive(i);
+                    }
+                    
+                    const partitions = getPartitions(n);
+                    let html = '<div class="table-container">';
+                    html += `<h2 style="text-align: center; color: #1976D2; margin-bottom: 20px;">n = ${n}</h2>`;
+                    html += '<table>';
+                    html += '<tr>';
+                    html += '<th>n</th>';
+                    html += '<th>Partition</th>';
+                    html += '<th>Number of Trees</th>';
+                    html += '<th>Trees</th>';
+                    html += '</tr>';
+                    
+                    let totalCount = 0;
+                    
+                    // Handle n=1 special case
+                    if (n === 1) {
+                        html += '<tr>';
+                        html += `<td>1</td>`;
+                        html += `<td>⟨1⟩</td>`;
+                        html += `<td>1</td>`;
+                        html += `<td>${treeToColoredHtml(1)}</td>`;
+                        html += '</tr>';
+                        totalCount = 1;
+                    } else {
+                        for (const partition of partitions) {
+                            const trees = generateTreesForPartition(partition);
+                            const count = trees.length;
+                            totalCount += count;
+                            
+                            const treesHtml = trees.map(tree => treeToColoredHtml(tree)).join(', ');
+                            
+                            html += '<tr>';
+                            html += `<td>${n}</td>`;
+                            html += `<td>${formatPartition(partition)}</td>`;
+                            html += `<td>${count}</td>`;
+                            html += `<td>${treesHtml}</td>`;
+                            html += '</tr>';
+                        }
+                    }
+                    
+                    html += '<tr class="total-row">';
+                    html += '<td colspan="2"><strong>Total</strong></td>';
+                    html += `<td><strong>${totalCount}</strong></td>`;
+                    html += '<td></td>';
+                    html += '</tr>';
+                    html += '</table>';
+                    html += '</div>';
+                    
+                    const endTime = performance.now();
+                    const genTime = ((endTime - startTime) / 1000).toFixed(3);
+                    
+                    hideLoading();
+                    document.getElementById('results').innerHTML = html;
+                    
+                    // Update stats
+                    document.getElementById('statsN').textContent = n;
+                    document.getElementById('totalTrees').textContent = totalCount.toLocaleString();
+                    document.getElementById('totalPartitions').textContent = (n === 1 ? 1 : partitions.length).toLocaleString();
+                    document.getElementById('genTime').textContent = genTime + 's';
+                    showStats();
+                    
+                } catch (error) {
+                    hideLoading();
+                    showError('Error generating trees: ' + error.message);
+                    console.error(error);
+                }
+            }, 100);
+        }
+
+        // UI Helper functions
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showStats() {
+            document.getElementById('stats').classList.add('show');
+        }
+
+        function hideStats() {
+            document.getElementById('stats').classList.remove('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Allow Enter key to trigger generation
+        document.getElementById('nInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateTable();
+            }
+        });
+
+        // Generate initial table on load
+        window.addEventListener('load', function() {
+            generateTable();
+        });
+    </script>
+</body>
+</html>
